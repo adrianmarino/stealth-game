@@ -2,6 +2,7 @@
 #include "Components/SphereComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "Kismet/GameplayStatics.h"
+#include "FPSCharacter.h"
 
 AFPSObjectiveActor::AFPSObjectiveActor() {
 	MeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("MeshComponent"));
@@ -29,6 +30,11 @@ void AFPSObjectiveActor::PlayEffects() {
 
 void AFPSObjectiveActor::NotifyActorBeginOverlap(AActor* OtherActor) {
 	Super::NotifyActorBeginOverlap(OtherActor);
-	PlayEffects();
-	UE_LOG(LogTemp, Warning, TEXT("NotifyActorBeginOverlap"));
+
+	AFPSCharacter* Character = Cast<AFPSCharacter>(OtherActor);
+	if(Character) {
+		Character->SetObjectiveCarried(true);
+		PlayEffects();
+		UE_LOG(LogTemp, Warning, TEXT("Objective Carried by character!"));
+	}
 }

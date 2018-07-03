@@ -99,3 +99,10 @@ void AFPSCharacter::MoveRight(float Value)
 		AddMovementInput(GetActorRightVector(), Value);
 	}
 }
+
+bool AFPSCharacter::GetObjectiveCarried() { return ObjectiveCarried; }
+
+void AFPSCharacter::SetObjectiveCarried(bool Value) { 
+	ObjectiveCarried = Value;
+	GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Blue, FString::Printf(TEXT("Objective Carried: %s"), Value ? TEXT("Yes") : TEXT("No")));
+}

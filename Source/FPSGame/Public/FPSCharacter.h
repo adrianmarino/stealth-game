@@ -1,5 +1,3 @@
-// Copyright 1998-2017 Epic Games, Inc. All Rights Reserved.
-
 #pragma once
 
 #include "CoreMinimal.h"
@@ -18,6 +16,10 @@ UCLASS()
 class AFPSCharacter : public ACharacter
 {
 	GENERATED_BODY()
+
+private:
+
+	bool ObjectiveCarried;
 
 protected:
 
@@ -47,6 +49,11 @@ public:
 	/** AnimMontage to play each time we fire */
 	UPROPERTY(EditDefaultsOnly, Category = "Gameplay")
 	UAnimSequence* FireAnimation;
+
+	UFUNCTION(BlueprintCallable, Category = "Gameplay")
+	bool GetObjectiveCarried();
+
+	void SetObjectiveCarried(bool Value);
 
 protected:
 	
