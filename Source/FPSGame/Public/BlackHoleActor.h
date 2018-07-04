@@ -22,7 +22,10 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, Category = "Components")
 	UStaticMeshComponent* Mesh;
-	
+
+	UPROPERTY(VisibleAnywhere, Category = "Components")
+	UStaticMeshComponent* InnerMesh;
+
 	UPROPERTY(VisibleAnywhere, Category = "Components")
 	USphereComponent* InnerSphere;
 	

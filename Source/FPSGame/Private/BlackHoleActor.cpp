@@ -9,6 +9,10 @@ ABlackHoleActor::ABlackHoleActor() {
 	Mesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	RootComponent = Mesh;
 
+	InnerMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("InnerMesh"));
+	InnerMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	InnerMesh->SetupAttachment(Mesh);
+
 	InnerSphere = CreateDefaultSubobject<USphereComponent>(TEXT("InnerSphere"));
 	InnerSphere->SetSphereRadius(100);
 	InnerSphere->SetupAttachment(Mesh);
