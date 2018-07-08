@@ -5,18 +5,30 @@
 #include "FPSCharacter.h"
 
 ALaunchPadActor::ALaunchPadActor() {
-	MeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mesh"));
-	MeshComponent->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+	MeshComponent = this->InitializeMesh();
 	RootComponent = MeshComponent;
+	OverlapComponent = this->InitializeOverlap(MeshComponent);
 
-	OverlapComponent = CreateDefaultSubobject<UBoxComponent>(TEXT("Overlap"));
-	OverlapComponent->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
-	OverlapComponent->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
-	OverlapComponent->SetCollisionResponseToChannel(
+	LaunchPitch = 40;
+	LaunchStrength = 1500;
+}
+
+UStaticMeshComponent* ALaunchPadActor::InitializeMesh() {
+	UStaticMeshComponent* Component = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mesh"));
+	Component->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+	return Component;
+}
+
+UBoxComponent* ALaunchPadActor::InitializeOverlap(UStaticMeshComponent* Mesh) {
+	UBoxComponent* Component = CreateDefaultSubobject<UBoxComponent>(TEXT("Overlap"));
+	Component->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	Component->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
+	Component->SetCollisionResponseToChannel(
 		ECollisionChannel::ECC_Pawn,
 		ECollisionResponse::ECR_Overlap
 	);
-	OverlapComponent->SetupAttachment(MeshComponent);
+	Component->SetupAttachment(Mesh);
+	return Component;
 }
 
 void ALaunchPadActor::NotifyActorBeginOverlap(AActor* OtherActor) {
@@ -26,5 +38,12 @@ void ALaunchPadActor::NotifyActorBeginOverlap(AActor* OtherActor) {
 	AFPSCharacter* Character = Cast<AFPSCharacter>(OtherActor);
 	if(!Character) return;
 
-	Character->LaunchCharacter(Velocity, false, false);
+	Character->LaunchCharacter(GetLaunchVelocity(), true, true);
+}
+
+FVector ALaunchPadActor::GetLaunchVelocity() {
+	FRotator LaunchDirection = GetActorRotation();
+	LaunchDirection.Pitch = LaunchPitch;
+	
+	return LaunchDirection.Vector() * LaunchStrength;
 }

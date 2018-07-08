@@ -22,8 +22,17 @@ protected:
 	UPROPERTY(VisibleAnywhere, Category = "Components")
 	UBoxComponent* OverlapComponent;
 
-	UPROPERTY(EditAnywhere, Category = "Settings", meta = (MakeEditWidget = true))
-	FVector Velocity;
+	UPROPERTY(EditInstanceOnly, Category = "Settings")
+	float LaunchPitch;
+
+	UPROPERTY(EditInstanceOnly, Category = "Settings")
+	float LaunchStrength;
+
+	FVector GetLaunchVelocity();
+
+	UStaticMeshComponent* InitializeMesh();
+
+	UBoxComponent* InitializeOverlap(UStaticMeshComponent* Mesh);
 
 public:
 	virtual void NotifyActorBeginOverlap(AActor* OtherActor) override;
