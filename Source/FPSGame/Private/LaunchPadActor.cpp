@@ -5,40 +5,52 @@
 #include "FPSCharacter.h"
 
 ALaunchPadActor::ALaunchPadActor() {
-	MeshComponent = this->InitializeMesh();
-	RootComponent = MeshComponent;
-	OverlapComponent = this->InitializeOverlap(MeshComponent);
+	OverlapComponent = this->InitializeOverlap();
+	RootComponent = OverlapComponent;
+	MeshComponent = this->InitializeMesh(OverlapComponent);
 
 	LaunchPitch = 40;
 	LaunchStrength = 1500;
 }
 
-UStaticMeshComponent* ALaunchPadActor::InitializeMesh() {
+UStaticMeshComponent* ALaunchPadActor::InitializeMesh(UBoxComponent* Parent) {
 	UStaticMeshComponent* Component = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mesh"));
 	Component->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+	Component->SetupAttachment(Parent);
 	return Component;
 }
 
-UBoxComponent* ALaunchPadActor::InitializeOverlap(UStaticMeshComponent* Mesh) {
+UBoxComponent* ALaunchPadActor::InitializeOverlap() {
 	UBoxComponent* Component = CreateDefaultSubobject<UBoxComponent>(TEXT("Overlap"));
+	Component->SetBoxExtent(FVector(50, 50, 15));
 	Component->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 	Component->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
 	Component->SetCollisionResponseToChannel(
 		ECollisionChannel::ECC_Pawn,
 		ECollisionResponse::ECR_Overlap
 	);
-	Component->SetupAttachment(Mesh);
+	Component->OnComponentBeginOverlap.AddDynamic(this, &ALaunchPadActor::HandleOverlapEvent);
 	return Component;
 }
 
-void ALaunchPadActor::NotifyActorBeginOverlap(AActor* OtherActor) {
-	Super::NotifyActorBeginOverlap(OtherActor);
-	if(!OtherActor) return;
-
-	AFPSCharacter* Character = Cast<AFPSCharacter>(OtherActor);
-	if(!Character) return;
-
-	Character->LaunchCharacter(GetLaunchVelocity(), true, true);
+void ALaunchPadActor::HandleOverlapEvent(
+		UPrimitiveComponent* OverlappedComponent,
+		AActor* OtherActor,
+		UPrimitiveComponent* OtherComp,
+		int32 OtherBodyIndex,
+		bool bFromSweep,
+		const FHitResult & SweepResult
+	) {
+	if(OtherComp && OtherComp->IsSimulatingPhysics()) {
+		OtherComp->AddImpulse(GetLaunchVelocity(), NAME_None, true);
+		UE_LOG(LogTemp, Log, TEXT("LAUNCH COMPONENT!"));
+	} else if(OtherActor) {
+		AFPSCharacter* Character = Cast<AFPSCharacter>(OtherActor);
+		if(Character) {
+			Character->LaunchCharacter(GetLaunchVelocity(), true, true);
+			UE_LOG(LogTemp, Log, TEXT("LAUNCH CHARACTER!"));
+		}
+	} 
 }
 
 FVector ALaunchPadActor::GetLaunchVelocity() {
