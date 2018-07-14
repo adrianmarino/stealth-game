@@ -19,11 +19,18 @@ private:
 
 	void ShowSphereIn(FVector Location, FColor Color);
 
+	FRotator OriginalRotator;
+
+    FTimerHandle ResetRotationTimer;
+
 protected:
 	virtual void BeginPlay() override;
 
 	UPROPERTY(VisibleAnywhere, Category = "AI")
 	UPawnSensingComponent* PawnSensingComponent;
+
+	UFUNCTION()
+	void ResetOrientation();
 
 public:
 	UFUNCTION()

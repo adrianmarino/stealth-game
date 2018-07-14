@@ -12,6 +12,7 @@ AGuardCharacter::AGuardCharacter() {
 
 void AGuardCharacter::BeginPlay() {
     Super::BeginPlay();
+    OriginalRotator = GetActorRotation();
 }
 
 void AGuardCharacter::Tick(float DeltaTime) {
@@ -31,6 +32,18 @@ void AGuardCharacter::OnHearNoiseEvent(
     if (PawnInstigator == nullptr) return;
     ShowSphereIn(Location, FColor::Blue);
     this->RotateTo(Location);
+
+    GetWorldTimerManager().ClearTimer(ResetRotationTimer);
+    GetWorldTimerManager().SetTimer(
+        ResetRotationTimer, 
+        this,
+        &AGuardCharacter::ResetOrientation,
+        3
+    );
+}
+
+void AGuardCharacter::ResetOrientation() {
+    SetActorRotation(OriginalRotator);
 }
 
 void AGuardCharacter::ShowSphereIn(FVector Location, FColor Color) {
