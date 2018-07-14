@@ -24,13 +24,11 @@ void AGuardCharacter::OnSeePawnEvent(APawn *SeePawn) {
             GetWorld(),
             SeePawn->GetActorLocation(),
             32.0f,
-            12,
+            30,
             FColor::Red,
             false,
             10.0f
     );
-
-    UE_LOG(LogTemp, Log, TEXT("PAWN WAS SEE!"));
 }
 
 void AGuardCharacter::OnHearNoiseEvent(
