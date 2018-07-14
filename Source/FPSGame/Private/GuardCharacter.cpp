@@ -1,39 +1,42 @@
+#include "GuardCharacter.h"
 #include "Perception/PawnSensingComponent.h"
 #include "DrawDebugHelpers.h"
-#include "GuardCharacter.h"
 
 AGuardCharacter::AGuardCharacter() {
-	PrimaryActorTick.bCanEverTick = true;
-	PawnSensingComponent = CreateDefaultSubobject<UPawnSensingComponent>(TEXT("Perception"));
-	PawnSensingComponent->OnSeePawn.AddDynamic(this, &AGuardCharacter::OnSeePawnEvent);
-	PawnSensingComponent->OnHearNoise.AddDynamic(this,  &AGuardCharacter::OnHearNoiseEvent);
+    PrimaryActorTick.bCanEverTick = true;
+    PawnSensingComponent = CreateDefaultSubobject<UPawnSensingComponent>(TEXT("Perception"));
+    PawnSensingComponent->OnSeePawn.AddDynamic(this, &AGuardCharacter::OnSeePawnEvent);
+    PawnSensingComponent->OnHearNoise.AddDynamic(this, &AGuardCharacter::OnHearNoiseEvent);
 }
 
 void AGuardCharacter::BeginPlay() {
-	Super::BeginPlay();	
+    Super::BeginPlay();
 }
 
 void AGuardCharacter::Tick(float DeltaTime) {
-	Super::Tick(DeltaTime);
+    Super::Tick(DeltaTime);
 }
 
-void AGuardCharacter::OnSeePawnEvent(APawn* SeePawn) {
-	if(SeePawn == nullptr) return;
+void AGuardCharacter::OnSeePawnEvent(APawn *SeePawn) {
+    if (SeePawn == nullptr) return;
 
-	DrawDebugSphere(
-		GetWorld(),
-		SeePawn->GetActorLocation(),
-		32,
-		12,
-		FColor::Green,
-		false
-	);
+    DrawDebugSphere(
+            GetWorld(),
+            SeePawn->GetActorLocation(),
+            32.0f,
+            12,
+            FColor::Red,
+            false,
+            10.0f
+    );
+
+    UE_LOG(LogTemp, Log, TEXT("PAWN WAS SEE!"));
 }
 
 void AGuardCharacter::OnHearNoiseEvent(
-	APawn* PawnInstigator, 
-	const FVector& Location, 
-	float Volume
+        APawn *PawnInstigator,
+        const FVector &Location,
+        float Volume
 ) {
 
 }
