@@ -36,5 +36,15 @@ void AGuardCharacter::OnHearNoiseEvent(
         const FVector &Location,
         float Volume
 ) {
+    if (PawnInstigator == nullptr) return;
 
+    DrawDebugSphere(
+            GetWorld(),
+            PawnInstigator->GetActorLocation(),
+            32.0f,
+            30,
+            FColor::Blue,
+            false,
+            10.0f
+    );
 }
