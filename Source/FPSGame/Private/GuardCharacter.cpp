@@ -29,6 +29,7 @@ void AGuardCharacter::OnSeePawnEvent(APawn *SeePawn) {
             false,
             10.0f
     );
+    UE_LOG(LogTemp, Log, TEXT("PAWN WAS SEE!"));
 }
 
 void AGuardCharacter::OnHearNoiseEvent(
@@ -40,11 +41,12 @@ void AGuardCharacter::OnHearNoiseEvent(
 
     DrawDebugSphere(
             GetWorld(),
-            PawnInstigator->GetActorLocation(),
+            Location,
             32.0f,
             30,
             FColor::Blue,
             false,
             10.0f
     );
+    UE_LOG(LogTemp, Log, TEXT("PAWN WAS HEAR!"));
 }
