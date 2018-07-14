@@ -14,6 +14,11 @@ class FPSGAME_API AGuardCharacter : public ACharacter
 public:
 	AGuardCharacter();
 
+private:
+	void RotateTo(FVector Location);
+
+	void ShowSphereIn(FVector Location, FColor Color);
+
 protected:
 	virtual void BeginPlay() override;
 

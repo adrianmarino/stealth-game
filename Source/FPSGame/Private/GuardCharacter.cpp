@@ -1,6 +1,7 @@
 #include "GuardCharacter.h"
 #include "Perception/PawnSensingComponent.h"
 #include "DrawDebugHelpers.h"
+#include "Kismet/KismetMathLibrary.h"
 
 AGuardCharacter::AGuardCharacter() {
     PrimaryActorTick.bCanEverTick = true;
@@ -19,17 +20,7 @@ void AGuardCharacter::Tick(float DeltaTime) {
 
 void AGuardCharacter::OnSeePawnEvent(APawn *SeePawn) {
     if (SeePawn == nullptr) return;
-
-    DrawDebugSphere(
-            GetWorld(),
-            SeePawn->GetActorLocation(),
-            32.0f,
-            30,
-            FColor::Red,
-            false,
-            10.0f
-    );
-    UE_LOG(LogTemp, Log, TEXT("PAWN WAS SEE!"));
+    ShowSphereIn(SeePawn->GetActorLocation(), FColor::Red);
 }
 
 void AGuardCharacter::OnHearNoiseEvent(
@@ -38,15 +29,25 @@ void AGuardCharacter::OnHearNoiseEvent(
         float Volume
 ) {
     if (PawnInstigator == nullptr) return;
+    ShowSphereIn(Location, FColor::Blue);
+    this->RotateTo(Location);
+}
 
-    DrawDebugSphere(
+void AGuardCharacter::ShowSphereIn(FVector Location, FColor Color) {
+        DrawDebugSphere(
             GetWorld(),
             Location,
             32.0f,
             30,
-            FColor::Blue,
+            Color,
             false,
             10.0f
     );
-    UE_LOG(LogTemp, Log, TEXT("PAWN WAS HEAR!"));
+}
+
+void AGuardCharacter::RotateTo(FVector Location) {
+    FRotator LookAtTo = UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), Location);
+    LookAtTo.Pitch = 0;
+    LookAtTo.Roll = 0;
+    SetActorRotation(LookAtTo);
 }
