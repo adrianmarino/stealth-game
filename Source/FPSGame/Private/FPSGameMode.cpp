@@ -11,7 +11,7 @@ AFPSGameMode::AFPSGameMode() {
 	HUDClass = AFPSHUD::StaticClass();
 }
 
-void AFPSGameMode::CompleteMission(APawn* InstigatorPawn) {
+void AFPSGameMode::CompleteMission(APawn* InstigatorPawn, bool MissionSuccess) {
 	if(!InstigatorPawn) return;
 	if(!SpectatingViewpointClass) {
 		UE_LOG(LogTemp, Error, TEXT("SpectatingViewpointClass is nullptr!. Can not change view spectating view target."));
@@ -37,5 +37,5 @@ void AFPSGameMode::CompleteMission(APawn* InstigatorPawn) {
 		EViewTargetBlendFunction::VTBlend_Cubic
 	);
 
-	OnMissionCompleted(InstigatorPawn);
+	OnMissionCompleted(InstigatorPawn, MissionSuccess);
 }

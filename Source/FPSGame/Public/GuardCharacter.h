@@ -15,19 +15,21 @@ public:
 	AGuardCharacter();
 
 private:
-	void RotateTo(FVector Location);
-
-	void ShowSphereIn(FVector Location, FColor Color);
-
 	FRotator OriginalRotator;
 
     FTimerHandle ResetRotationTimer;
 
-protected:
-	virtual void BeginPlay() override;
+	void RotateTo(FVector Location);
 
+	void ShowSphereIn(FVector Location, FColor Color);
+
+	void StartResetOrientation();
+
+protected:
 	UPROPERTY(VisibleAnywhere, Category = "AI")
 	UPawnSensingComponent* PawnSensingComponent;
+
+	virtual void BeginPlay() override;
 
 	UFUNCTION()
 	void ResetOrientation();
@@ -38,7 +40,4 @@ public:
 
 	UFUNCTION()
 	void OnHearNoiseEvent(APawn* PawnInstigator, const FVector& Location, float Volume);
-
-
-	virtual void Tick(float DeltaTime) override;
 };
