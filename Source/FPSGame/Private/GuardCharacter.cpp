@@ -8,6 +8,14 @@ AGuardCharacter::AGuardCharacter() {
     PawnSensingComponent = CreateDefaultSubobject<UPawnSensingComponent>(TEXT("Perception"));
     PawnSensingComponent->OnSeePawn.AddDynamic(this, &AGuardCharacter::OnSeePawnEvent);
     PawnSensingComponent->OnHearNoise.AddDynamic(this, &AGuardCharacter::OnHearNoiseEvent);
+
+    State = EGuardState::Idel;
+}
+
+void AGuardCharacter::SetState(EGuardState NextState) {
+    if(NextState == State) return;
+    State = NextState;
+    this->OnStateChanged(State);
 }
 
 void AGuardCharacter::BeginPlay() {
@@ -21,6 +29,8 @@ void AGuardCharacter::OnSeePawnEvent(APawn *SeePawn) {
 
     AFPSGameMode* GameMode = Cast<AFPSGameMode>(GetWorld()->GetAuthGameMode());
     if(GameMode) GameMode->CompleteMission(SeePawn, false);
+
+    this->SetState(EGuardState::Alerted);
 }
 
 void AGuardCharacter::OnHearNoiseEvent(
@@ -28,13 +38,21 @@ void AGuardCharacter::OnHearNoiseEvent(
     const FVector &Location,
     float Volume
 ) {
+    if(State == EGuardState::Alerted) return;
+
     if (PawnInstigator == nullptr) return;
     this->ShowSphereIn(Location, FColor::Blue);
     this->RotateTo(Location);
     this->StartResetOrientation();
+
+    this->SetState(EGuardState::Suspicious);
 }
 
-void AGuardCharacter::ResetOrientation() { SetActorRotation(OriginalRotator); }
+void AGuardCharacter::ResetOrientation() {
+    if(State == EGuardState::Alerted) return;
+    SetActorRotation(OriginalRotator);
+    this->SetState(EGuardState::Idel);    
+}
 
 void AGuardCharacter::ShowSphereIn(FVector Location, FColor Color) {
     DrawDebugSphere(
