@@ -1,13 +1,12 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "GuardStateEnum.h"
 #include "GameFramework/Character.h"
 #include "GuardCharacter.generated.h"
 
 class UPawnSensingComponent;
-
-UENUM(BlueprintType)
-enum class EGuardState : uint8 { Idel, Suspicious, Alerted };
+class IGuardState;
 
 UCLASS()
 class FPSGAME_API AGuardCharacter : public ACharacter
@@ -22,15 +21,7 @@ private:
 
     FTimerHandle ResetRotationTimer;
 
-	EGuardState State;
-
-	void SetState(EGuardState NextState);
-
-	void RotateTo(FVector Location);
-
-	void ShowSphereIn(FVector Location, FColor Color);
-
-	void StartResetOrientation();
+	IGuardState* GuardState;
 
 protected:
 	UPROPERTY(VisibleAnywhere, Category = "AI")
@@ -41,13 +32,29 @@ protected:
 	UFUNCTION()
 	void ResetOrientation();
 
-	UFUNCTION(BlueprintImplementableEvent, Category = "AI")
-	void OnStateChanged(EGuardState State);
-
-public:
 	UFUNCTION()
 	void OnSeePawnEvent(APawn* Pawn);
 
 	UFUNCTION()
-	void OnHearNoiseEvent(APawn* PawnInstigator, const FVector& Location, float Volume);
+	void OnHearNoiseEvent(
+		APawn* PawnInstigator,
+		const FVector& Location,
+		float Volume
+	);
+
+public:
+	UFUNCTION(BlueprintImplementableEvent, Category = "AI")
+	void OnStateChanged(EGuardState State);
+
+	void CallCompleteMission(APawn* Pawn, bool Success);
+
+	void SetState(EGuardState NextState);
+
+	void RotateTo(FVector Location);
+
+	void ShowSphereIn(FVector Location, FColor Color);
+
+	void SetupOriginalOrientation();
+
+	void StartResetOrientation();
 };

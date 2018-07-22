@@ -18,7 +18,6 @@ void AFPSGameMode::CompleteMission(APawn* InstigatorPawn, bool MissionSuccess) {
 		return;
 	}
 
-	UE_LOG(LogTemp, Log, TEXT("Mission Completed!"));
 	InstigatorPawn->DisableInput(nullptr);
 
 	TArray<AActor*> SpectatingActors;
@@ -36,6 +35,12 @@ void AFPSGameMode::CompleteMission(APawn* InstigatorPawn, bool MissionSuccess) {
 		0.5f,
 		EViewTargetBlendFunction::VTBlend_Cubic
 	);
+
+	if(MissionSuccess) {
+		UE_LOG(LogTemp, Log, TEXT("Mission Completed!"));
+	} else {
+		UE_LOG(LogTemp, Log, TEXT("Mission Fail!"));
+	}
 
 	OnMissionCompleted(InstigatorPawn, MissionSuccess);
 }
