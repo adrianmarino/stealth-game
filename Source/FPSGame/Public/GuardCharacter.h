@@ -3,6 +3,7 @@
 #include "CoreMinimal.h"
 #include "GuardStateEnum.h"
 #include "GameFramework/Character.h"
+#include "functional"
 #include "GuardCharacter.generated.h"
 
 class UPawnSensingComponent;
@@ -23,6 +24,12 @@ private:
 
 	IGuardState* GuardState;
 
+	bool HasState();
+
+	IGuardState* GetState();
+
+	void ExecTrans(std::function<EGuardState()> eval);
+
 protected:
 	UPROPERTY(VisibleAnywhere, Category = "AI")
 	UPawnSensingComponent* PawnSensingComponent;
@@ -41,6 +48,7 @@ protected:
 		const FVector& Location,
 		float Volume
 	);
+	
 
 public:
 	UFUNCTION(BlueprintImplementableEvent, Category = "AI")

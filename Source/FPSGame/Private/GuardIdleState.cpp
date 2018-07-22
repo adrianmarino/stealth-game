@@ -8,6 +8,8 @@ UGuardIdleState::UGuardIdleState() {}
 
 EGuardState UGuardIdleState::GetType() { return EGuardState::Idle; }
 
+FString UGuardIdleState::GetName() { return GetClass()->GetFName().ToString(); }
+
 EGuardState UGuardIdleState::OnSeePawnEvent(
     AGuardCharacter* Character,
     APawn* SeePawn

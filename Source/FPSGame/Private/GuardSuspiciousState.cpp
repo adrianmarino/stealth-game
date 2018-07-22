@@ -8,6 +8,8 @@ UGuardSuspiciousState::UGuardSuspiciousState() {}
 
 EGuardState UGuardSuspiciousState::GetType() { return EGuardState::Suspicious; }
 
+FString UGuardSuspiciousState::GetName() { return GetClass()->GetFName().ToString(); }
+
 EGuardState UGuardSuspiciousState::ResetOrientation(AGuardCharacter* Character) {
     Character->SetupOriginalOrientation();
     return EGuardState::Idle;

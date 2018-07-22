@@ -16,6 +16,8 @@ class FPSGAME_API UGuardIdleState : public UObject, public IGuardState
 
 	virtual EGuardState GetType() override;
 
+	virtual FString GetName() override;
+
 	virtual EGuardState OnSeePawnEvent(AGuardCharacter* Character, APawn* Pawn) override;
 
 	virtual EGuardState OnHearNoiseEvent(

@@ -16,6 +16,8 @@ public:
 
     virtual EGuardState GetType() = 0;
 
+	virtual FString GetName() = 0;
+
 	virtual EGuardState ResetOrientation(AGuardCharacter* Character);
 
 	virtual EGuardState OnSeePawnEvent(AGuardCharacter* Character, APawn* Pawn);

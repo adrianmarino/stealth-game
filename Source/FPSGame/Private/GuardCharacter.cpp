@@ -74,25 +74,19 @@ void AGuardCharacter::CallCompleteMission(APawn* Pawn, bool Success) {
 // State maquine
 // ----------------------------------------------------------------------------
 void AGuardCharacter::SetState(EGuardState NextGuardState) {
-    if(GuardState == nullptr) {
+    if(!HasState())
         GuardState = NewObject<UGuardIdleState>(this, TEXT("GuardIdleState"));
-        UE_LOG(LogTemp, Warning, TEXT("Change to IDLE State!"));
-    
-    } else if(GuardState->GetType() == NextGuardState) {
+    else if(GuardState->GetType() == NextGuardState)
         return;
-
-    } else if (EGuardState::Idle == NextGuardState) { 
+    else if (EGuardState::Idle == NextGuardState)
         GuardState = NewObject<UGuardIdleState>(this, TEXT("GuardIdleState"));
-        UE_LOG(LogTemp, Warning, TEXT("Change to IDLE State!"));
-    
-    } else if(EGuardState::Alerted == NextGuardState) {
+    else if(EGuardState::Alerted == NextGuardState)
         GuardState = NewObject<UGuardAlertedState>(this, TEXT("GuarddAlertedState"));
-        UE_LOG(LogTemp, Warning, TEXT("Change to ALERTED State!"));
-    
-    } else if(EGuardState::Suspicious == NextGuardState) {
+    else if(EGuardState::Suspicious == NextGuardState)
         GuardState = NewObject<UGuardSuspiciousState>(this, TEXT("GuardSuspiciousState"));
-        UE_LOG(LogTemp, Warning, TEXT("Change to SUSPICIOUS State!"));
-    }
+
+    UE_LOG(LogTemp, Warning, TEXT("Change to %s state!"), *GuardState->GetName());
+
     this->OnStateChanged(NextGuardState);
 }
 
@@ -101,21 +95,22 @@ void AGuardCharacter::OnHearNoiseEvent(
     const FVector &Location,
     float Volume
 ) {
-    if(GuardState == nullptr || PawnInstigator == nullptr) return;
-    
-    EGuardState Next = GuardState->OnHearNoiseEvent(this, PawnInstigator, Location);
-    SetState(Next);
+    if(PawnInstigator == nullptr) return;
+    ExecTrans([&] { return GuardState->OnHearNoiseEvent(this, PawnInstigator, Location); });
 }
 
 void AGuardCharacter::OnSeePawnEvent(APawn *SeePawn) { 
-    if(GuardState == nullptr || SeePawn == nullptr) return;
-    EGuardState Next = GuardState->OnSeePawnEvent(this, SeePawn);
-    SetState(Next);
+    if(SeePawn == nullptr) return;
+    ExecTrans([&] { return GuardState->OnSeePawnEvent(this, SeePawn); });
 }
 
 void AGuardCharacter::ResetOrientation() {
-    if(GuardState == nullptr) return;
-    EGuardState Next = GuardState->ResetOrientation(this);
-    SetState(Next);
+    ExecTrans([&] { return GuardState->ResetOrientation(this); });
 }
+
+void AGuardCharacter::ExecTrans(std::function<EGuardState()> eval) {
+    if(HasState()) SetState(eval());
+}
+bool AGuardCharacter::HasState() {return GetState() != nullptr; }
+IGuardState* AGuardCharacter::GetState() { return GuardState; }
 // ----------------------------------------------------------------------------

@@ -13,4 +13,6 @@ class FPSGAME_API UGuardAlertedState : public UObject, public IGuardState
 	UGuardAlertedState();
 
 	virtual EGuardState GetType() override;
+
+	virtual FString GetName() override;
 };

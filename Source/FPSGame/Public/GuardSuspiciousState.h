@@ -14,6 +14,8 @@ class FPSGAME_API UGuardSuspiciousState : public UObject, public IGuardState
 	
 	virtual EGuardState GetType() override;
 
+	virtual FString GetName() override;
+
 	virtual EGuardState ResetOrientation(AGuardCharacter* Character) override;
 
 	virtual EGuardState OnHearNoiseEvent(
