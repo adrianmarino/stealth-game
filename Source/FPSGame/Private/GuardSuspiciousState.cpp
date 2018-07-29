@@ -12,6 +12,7 @@ FString UGuardSuspiciousState::GetName() { return GetClass()->GetFName().ToStrin
 
 EGuardState UGuardSuspiciousState::ResetOrientation(AGuardCharacter* Character) {
     Character->SetupOriginalOrientation();
+    Character->Play();
     return EGuardState::Idle;
 }
 

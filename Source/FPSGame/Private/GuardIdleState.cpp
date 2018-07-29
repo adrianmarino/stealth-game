@@ -19,6 +19,7 @@ EGuardState UGuardIdleState::OnSeePawnEvent(
         SeePawn->GetActorLocation(),
         FColor::Red
     );
+    Character->Pause();
     Character->CallCompleteMission(SeePawn, false);
    return EGuardState::Alerted;
 }
@@ -31,5 +32,6 @@ EGuardState UGuardIdleState::OnHearNoiseEvent(
     DebugUtils::ShowSphereIn(Character->GetWorld(), Location, FColor::Blue);
     Character->RotateTo(Location);
     Character->StartResetOrientation();
+    Character->Pause();
     return EGuardState::Suspicious;
 }

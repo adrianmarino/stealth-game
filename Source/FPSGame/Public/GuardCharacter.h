@@ -14,9 +14,9 @@ class FPSGAME_API AGuardCharacter : public ACharacter
 {
 	GENERATED_BODY()
 
-public:
-	AGuardCharacter();
-
+// ----------------------------------------------------------------------------
+// Attributes
+// ----------------------------------------------------------------------------
 private:
 	FRotator OriginalRotator;
 
@@ -24,16 +24,40 @@ private:
 
 	IGuardState* GuardState;
 
-	bool HasState();
-
-	IGuardState* GetState();
-
-	void ExecTrans(std::function<EGuardState()> eval);
-
 protected:
 	UPROPERTY(VisibleAnywhere, Category = "AI")
 	UPawnSensingComponent* PawnSensingComponent;
 
+	UPROPERTY(EditInstanceOnly, Category = "AI")
+	bool enablePatrol;
+
+	UPROPERTY(EditInstanceOnly, Category = "AI", meta = (EditCondition= "enablePatrol"))
+	AActor* FirstPatrolPoint;
+
+	UPROPERTY(EditInstanceOnly, Category = "AI", meta = (EditCondition= "enablePatrol"))
+	AActor* SecondPatrolPoint;
+
+	AActor* CurrentPatrolPoint;
+
+// ----------------------------------------------------------------------------
+// Constructor
+// ----------------------------------------------------------------------------
+public:
+	AGuardCharacter();
+	
+// ----------------------------------------------------------------------------
+// Methods
+// ----------------------------------------------------------------------------
+private:
+	void ExecTrans(std::function<EGuardState()> perform);
+
+	void TurnPatrolDirection();
+
+	void SetState(EGuardState NextState);
+
+	void MoveToNextPatrolPoint();
+
+protected:
 	virtual void BeginPlay() override;
 
 	UFUNCTION()
@@ -47,16 +71,13 @@ protected:
 		APawn* PawnInstigator,
 		const FVector& Location,
 		float Volume
-	);
-	
+	);	
 
 public:
 	UFUNCTION(BlueprintImplementableEvent, Category = "AI")
 	void OnStateChanged(EGuardState State);
 
 	void CallCompleteMission(APawn* Pawn, bool Success);
-
-	void SetState(EGuardState NextState);
 
 	void RotateTo(FVector Location);
 
@@ -65,4 +86,10 @@ public:
 	void SetupOriginalOrientation();
 
 	void StartResetOrientation();
+
+	virtual void Tick(float DeltaTime) override;
+
+	void Play();
+
+	void Pause();
 };

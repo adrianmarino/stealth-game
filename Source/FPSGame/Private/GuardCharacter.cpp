@@ -10,6 +10,7 @@
 #include "GuardIdleState.h"
 #include "GuardAlertedState.h"
 #include "GuardSuspiciousState.h"
+#include "Blueprint/AIBlueprintHelperLibrary.h"
 // ----------------------------------------------------------------------------
 //
 //
@@ -36,6 +37,7 @@ void AGuardCharacter::BeginPlay() {
     SetState(EGuardState::Idle);
     Super::BeginPlay();
     OriginalRotator = GetActorRotation();
+    MoveToNextPatrolPoint();
 }
 
 void AGuardCharacter::SetupOriginalOrientation() { 
@@ -66,6 +68,42 @@ void AGuardCharacter::CallCompleteMission(APawn* Pawn, bool Success) {
     AFPSGameMode* GameMode = Cast<AFPSGameMode>(GetWorld()->GetAuthGameMode());
     if(GameMode) GameMode->CompleteMission(Pawn, Success);
 }
+
+void AGuardCharacter::Tick(float DeltaTime) {
+    Super::Tick(DeltaTime);
+    TurnPatrolDirection();
+}
+// ----------------------------------------------------------------------------
+//
+//
+//
+// ----------------------------------------------------------------------------
+// Patrol
+// ----------------------------------------------------------------------------
+void AGuardCharacter::TurnPatrolDirection() {
+    if(!enablePatrol) return;
+
+    FVector Delta = GetActorLocation() - CurrentPatrolPoint->GetActorLocation();
+    float Distance = Delta.Size();
+
+    if(Distance < 100) {
+        MoveToNextPatrolPoint();
+    }
+}
+
+void AGuardCharacter::MoveToNextPatrolPoint() {
+    if(!enablePatrol) return;
+
+    if(CurrentPatrolPoint == nullptr || CurrentPatrolPoint == SecondPatrolPoint) {
+        CurrentPatrolPoint = FirstPatrolPoint;
+    } else if(CurrentPatrolPoint == FirstPatrolPoint) {
+        CurrentPatrolPoint = SecondPatrolPoint;
+    }
+    UAIBlueprintHelperLibrary::SimpleMoveToActor(GetController(), CurrentPatrolPoint);
+}
+
+void AGuardCharacter::Play() { MoveToNextPatrolPoint(); }
+void AGuardCharacter::Pause() { Controller->StopMovement(); }
 // ----------------------------------------------------------------------------
 //
 //
@@ -74,16 +112,17 @@ void AGuardCharacter::CallCompleteMission(APawn* Pawn, bool Success) {
 // State maquine
 // ----------------------------------------------------------------------------
 void AGuardCharacter::SetState(EGuardState NextGuardState) {
-    if(!HasState())
-        GuardState = NewObject<UGuardIdleState>(this, TEXT("GuardIdleState"));
-    else if(GuardState->GetType() == NextGuardState)
+    if(GuardState == nullptr) {
+        GuardState = NewObject<UGuardIdleState>(this, TEXT("Idle"));
+    } else if(GuardState->GetType() == NextGuardState) {
         return;
-    else if (EGuardState::Idle == NextGuardState)
-        GuardState = NewObject<UGuardIdleState>(this, TEXT("GuardIdleState"));
-    else if(EGuardState::Alerted == NextGuardState)
-        GuardState = NewObject<UGuardAlertedState>(this, TEXT("GuarddAlertedState"));
-    else if(EGuardState::Suspicious == NextGuardState)
-        GuardState = NewObject<UGuardSuspiciousState>(this, TEXT("GuardSuspiciousState"));
+    } else if (EGuardState::Idle == NextGuardState) {
+        GuardState = NewObject<UGuardIdleState>(this, TEXT("Idle"));
+    } else if(EGuardState::Alerted == NextGuardState) {
+         GuardState = NewObject<UGuardAlertedState>(this, TEXT("Alerted"));
+    } else if(EGuardState::Suspicious == NextGuardState) {
+        GuardState = NewObject<UGuardSuspiciousState>(this, TEXT("Suspicious"));
+    }
 
     UE_LOG(LogTemp, Warning, TEXT("Change to %s state!"), *GuardState->GetName());
 
@@ -108,9 +147,9 @@ void AGuardCharacter::ResetOrientation() {
     ExecTrans([&] { return GuardState->ResetOrientation(this); });
 }
 
-void AGuardCharacter::ExecTrans(std::function<EGuardState()> eval) {
-    if(HasState()) SetState(eval());
+void AGuardCharacter::ExecTrans(std::function<EGuardState()> perform) {
+    if(GuardState == nullptr) return;
+    EGuardState NextStateName = perform();
+    SetState(NextStateName);
 }
-bool AGuardCharacter::HasState() {return GetState() != nullptr; }
-IGuardState* AGuardCharacter::GetState() { return GuardState; }
 // ----------------------------------------------------------------------------
