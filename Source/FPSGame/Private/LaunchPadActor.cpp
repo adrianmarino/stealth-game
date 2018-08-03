@@ -43,12 +43,10 @@ void ALaunchPadActor::HandleOverlapEvent(
 	) {
 	if(OtherComp && OtherComp->IsSimulatingPhysics()) {
 		OtherComp->AddImpulse(GetLaunchVelocity(), NAME_None, true);
-		UE_LOG(LogTemp, Log, TEXT("LAUNCH COMPONENT!"));
 	} else if(OtherActor) {
 		AFPSCharacter* Character = Cast<AFPSCharacter>(OtherActor);
 		if(Character) {
 			Character->LaunchCharacter(GetLaunchVelocity(), true, true);
-			UE_LOG(LogTemp, Log, TEXT("LAUNCH CHARACTER!"));
 		}
 	} 
 }
