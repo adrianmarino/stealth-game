@@ -5,7 +5,7 @@
 
 UENUM(BlueprintType)
 enum class EGuardState : uint8 { 
-    Idle, 
+    IdleWalking,
     Suspicious, 
     Alerted
 };

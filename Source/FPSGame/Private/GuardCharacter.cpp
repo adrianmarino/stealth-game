@@ -7,9 +7,10 @@
 #include "DrawDebugHelpers.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "GuardState.h"
-#include "GuardIdleState.h"
+#include "GuardIdleWalkingState.h"
 #include "GuardAlertedState.h"
 #include "GuardSuspiciousState.h"
+#include "VectorUtils.h"
 #include "Blueprint/AIBlueprintHelperLibrary.h"
 // ----------------------------------------------------------------------------
 //
@@ -34,7 +35,7 @@ AGuardCharacter::AGuardCharacter() {
 // Methods
 // ----------------------------------------------------------------------------
 void AGuardCharacter::BeginPlay() {
-    SetState(EGuardState::Idle);
+    SetState(EGuardState::IdleWalking);
     Super::BeginPlay();
     OriginalRotator = GetActorRotation();
     MoveToNextPatrolPoint();
@@ -71,7 +72,7 @@ void AGuardCharacter::CallCompleteMission(APawn* Pawn, bool Success) {
 
 void AGuardCharacter::Tick(float DeltaTime) {
     Super::Tick(DeltaTime);
-    TurnPatrolDirection();
+    GuardState->Tick(this, DeltaTime);
 }
 // ----------------------------------------------------------------------------
 //
@@ -83,22 +84,28 @@ void AGuardCharacter::Tick(float DeltaTime) {
 void AGuardCharacter::TurnPatrolDirection() {
     if(!enablePatrol) return;
 
-    FVector Delta = GetActorLocation() - CurrentPatrolPoint->GetActorLocation();
-    float Distance = Delta.Size();
+    float Distance = VectorUtils::DistanceBetween(
+        GetActorLocation(), 
+        CurrentPatrolPoint->GetActorLocation()
+    );
 
-    if(Distance < 100) {
-        MoveToNextPatrolPoint();
+    if(Distance >= 100) return;
+
+    if(CurrentPatrolPoint == SecondPatrolPoint) {
+        CurrentPatrolPoint = FirstPatrolPoint;
+    } else if(CurrentPatrolPoint == FirstPatrolPoint) {
+        CurrentPatrolPoint = SecondPatrolPoint;
     }
+
+    UAIBlueprintHelperLibrary::SimpleMoveToActor(GetController(), CurrentPatrolPoint);
 }
 
 void AGuardCharacter::MoveToNextPatrolPoint() {
     if(!enablePatrol) return;
 
-    if(CurrentPatrolPoint == nullptr || CurrentPatrolPoint == SecondPatrolPoint) {
+    if(CurrentPatrolPoint == nullptr)
         CurrentPatrolPoint = FirstPatrolPoint;
-    } else if(CurrentPatrolPoint == FirstPatrolPoint) {
-        CurrentPatrolPoint = SecondPatrolPoint;
-    }
+
     UAIBlueprintHelperLibrary::SimpleMoveToActor(GetController(), CurrentPatrolPoint);
 }
 
@@ -112,17 +119,12 @@ void AGuardCharacter::Pause() { Controller->StopMovement(); }
 // State maquine
 // ----------------------------------------------------------------------------
 void AGuardCharacter::SetState(EGuardState NextGuardState) {
-    if(GuardState == nullptr) {
-        GuardState = NewObject<UGuardIdleState>(this, TEXT("Idle"));
-    } else if(GuardState->GetType() == NextGuardState) {
-        return;
-    } else if (EGuardState::Idle == NextGuardState) {
-        GuardState = NewObject<UGuardIdleState>(this, TEXT("Idle"));
-    } else if(EGuardState::Alerted == NextGuardState) {
+    if (EGuardState::IdleWalking == NextGuardState)
+        GuardState = NewObject<UGuardIdleWalkingState>(this, TEXT("IdleWalking"));
+    else if(EGuardState::Alerted == NextGuardState)
          GuardState = NewObject<UGuardAlertedState>(this, TEXT("Alerted"));
-    } else if(EGuardState::Suspicious == NextGuardState) {
+    else if(EGuardState::Suspicious == NextGuardState)
         GuardState = NewObject<UGuardSuspiciousState>(this, TEXT("Suspicious"));
-    }
 
     UE_LOG(LogTemp, Warning, TEXT("Change to %s state!"), *GuardState->GetName());
 
@@ -135,21 +137,13 @@ void AGuardCharacter::OnHearNoiseEvent(
     float Volume
 ) {
     if(PawnInstigator == nullptr) return;
-    ExecTrans([&] { return GuardState->OnHearNoiseEvent(this, PawnInstigator, Location); });
+    GuardState->OnHearNoiseEvent(this, PawnInstigator, Location);
 }
 
 void AGuardCharacter::OnSeePawnEvent(APawn *SeePawn) { 
     if(SeePawn == nullptr) return;
-    ExecTrans([&] { return GuardState->OnSeePawnEvent(this, SeePawn); });
+    GuardState->OnSeePawnEvent(this, SeePawn);
 }
 
-void AGuardCharacter::ResetOrientation() {
-    ExecTrans([&] { return GuardState->ResetOrientation(this); });
-}
-
-void AGuardCharacter::ExecTrans(std::function<EGuardState()> perform) {
-    if(GuardState == nullptr) return;
-    EGuardState NextStateName = perform();
-    SetState(NextStateName);
-}
+void AGuardCharacter::ResetOrientation() { GuardState->ResetOrientation(this); }
 // ----------------------------------------------------------------------------

@@ -1,5 +1,5 @@
 #include "GuardSuspiciousState.h"
-#include "GuardIdleState.h"
+#include "GuardIdleWalkingState.h"
 #include "GuardCharacter.h"
 #include "DebugUtils.h"
 #include "GuardStateEnum.h"
@@ -10,19 +10,17 @@ EGuardState UGuardSuspiciousState::GetType() { return EGuardState::Suspicious; }
 
 FString UGuardSuspiciousState::GetName() { return GetClass()->GetFName().ToString(); }
 
-EGuardState UGuardSuspiciousState::ResetOrientation(AGuardCharacter* Character) {
+void UGuardSuspiciousState::ResetOrientation(AGuardCharacter* Character) {
     Character->SetupOriginalOrientation();
     Character->Play();
-    return EGuardState::Idle;
+    Character->SetState(EGuardState::IdleWalking);
 }
 
-EGuardState UGuardSuspiciousState::OnHearNoiseEvent(
+void UGuardSuspiciousState::OnHearNoiseEvent(
     AGuardCharacter* Character, 
     APawn* PawnInstigator, 
     const FVector& Location
 ) {
-    DebugUtils::ShowSphereIn(Character->GetWorld(), Location, FColor::Blue);
     Character->RotateTo(Location);
     Character->StartResetOrientation();
-    return EGuardState::Suspicious;
 }

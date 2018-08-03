@@ -49,12 +49,6 @@ public:
 // Methods
 // ----------------------------------------------------------------------------
 private:
-	void ExecTrans(std::function<EGuardState()> perform);
-
-	void TurnPatrolDirection();
-
-	void SetState(EGuardState NextState);
-
 	void MoveToNextPatrolPoint();
 
 protected:
@@ -71,7 +65,7 @@ protected:
 		APawn* PawnInstigator,
 		const FVector& Location,
 		float Volume
-	);	
+	);
 
 public:
 	UFUNCTION(BlueprintImplementableEvent, Category = "AI")
@@ -79,17 +73,19 @@ public:
 
 	void CallCompleteMission(APawn* Pawn, bool Success);
 
-	void RotateTo(FVector Location);
-
-	void ShowSphereIn(FVector Location, FColor Color);
-
-	void SetupOriginalOrientation();
-
-	void StartResetOrientation();
-
 	virtual void Tick(float DeltaTime) override;
 
 	void Play();
 
 	void Pause();
+
+	void TurnPatrolDirection();
+	
+	void RotateTo(FVector Location);
+
+	void SetupOriginalOrientation();
+
+	void StartResetOrientation();
+
+	void SetState(EGuardState NextState);
 };

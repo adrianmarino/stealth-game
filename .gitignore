@@ -82,3 +82,4 @@ CMakeLists.txt
 Makefile
 .idea/
 *.workspace
+build/

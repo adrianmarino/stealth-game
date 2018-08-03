@@ -18,9 +18,11 @@ public:
 
 	virtual FString GetName() = 0;
 
-	virtual EGuardState ResetOrientation(AGuardCharacter* Character);
+	virtual void Tick(AGuardCharacter* Character, float DeltaTime);
 
-	virtual EGuardState OnSeePawnEvent(AGuardCharacter* Character, APawn* Pawn);
+	virtual void ResetOrientation(AGuardCharacter* Character);
 
-	virtual EGuardState OnHearNoiseEvent(AGuardCharacter* Character, APawn* PawnInstigator, const FVector& Location);
+	virtual void OnSeePawnEvent(AGuardCharacter* Character, APawn* Pawn);
+
+	virtual void OnHearNoiseEvent(AGuardCharacter* Character, APawn* PawnInstigator, const FVector& Location);
 };

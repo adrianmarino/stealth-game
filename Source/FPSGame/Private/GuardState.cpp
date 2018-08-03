@@ -1,13 +1,13 @@
 #include "GuardState.h"
 
-EGuardState IGuardState::ResetOrientation(AGuardCharacter* Character) {
-    return GetType();
+void IGuardState::Tick(AGuardCharacter* Character, float DeltaTime) {
 }
 
-EGuardState IGuardState::OnSeePawnEvent(AGuardCharacter* Character, APawn* Pawn)  {
-    return GetType();
+void IGuardState::ResetOrientation(AGuardCharacter* Character) {
 }
 
-EGuardState IGuardState::OnHearNoiseEvent(AGuardCharacter* Character, APawn* PawnInstigator, const FVector& Location)  {
-    return GetType();
+void IGuardState::OnSeePawnEvent(AGuardCharacter* Character, APawn* Pawn)  {
+}
+
+void IGuardState::OnHearNoiseEvent(AGuardCharacter* Character, APawn* PawnInstigator, const FVector& Location)  {
 }

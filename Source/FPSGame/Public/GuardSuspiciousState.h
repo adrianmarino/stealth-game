@@ -16,9 +16,9 @@ class FPSGAME_API UGuardSuspiciousState : public UObject, public IGuardState
 
 	virtual FString GetName() override;
 
-	virtual EGuardState ResetOrientation(AGuardCharacter* Character) override;
+	virtual void ResetOrientation(AGuardCharacter* Character) override;
 
-	virtual EGuardState OnHearNoiseEvent(
+	virtual void OnHearNoiseEvent(
 		AGuardCharacter* Character,
 		APawn* PawnInstigator,
 		const FVector& Location
