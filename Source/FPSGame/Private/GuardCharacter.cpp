@@ -20,12 +20,9 @@
 // Constructor
 // ----------------------------------------------------------------------------
 AGuardCharacter::AGuardCharacter() {
-    PawnSensingComponent = CreateDefaultSubobject<UPawnSensingComponent>(
-        TEXT("Perception"));
-    PawnSensingComponent->OnSeePawn.AddDynamic(
-        this, &AGuardCharacter::OnSeePawnEvent);
-    PawnSensingComponent->OnHearNoise.AddDynamic(
-        this, &AGuardCharacter::OnHearNoiseEvent);
+    PawnSensingComponent = CreateDefaultSubobject<UPawnSensingComponent>(TEXT("Perception"));
+    PawnSensingComponent->OnSeePawn.AddDynamic(this, &AGuardCharacter::OnSeePawnEvent);
+    PawnSensingComponent->OnHearNoise.AddDynamic(this, &AGuardCharacter::OnHearNoiseEvent);
 }
 // ----------------------------------------------------------------------------
 //
@@ -113,7 +110,7 @@ void AGuardCharacter::Pause() { Controller->StopMovement(); }
 //
 //
 // ----------------------------------------------------------------------------
-// State maquine
+// State Maquine
 // ----------------------------------------------------------------------------
 void AGuardCharacter::SetState(EGuardState NextGuardState) {
     if (EGuardState::IdleWalking == NextGuardState)
