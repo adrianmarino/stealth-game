@@ -37,7 +37,7 @@ protected:
 	UPROPERTY(EditInstanceOnly, Category = "AI", meta = (EditCondition= "enablePatrol"))
 	AActor* SecondPatrolPoint;
 
-	AActor* CurrentPatrolPoint;
+	AActor* NextPatrolPoint;
 
 // ----------------------------------------------------------------------------
 // Constructor
@@ -50,6 +50,8 @@ public:
 // ----------------------------------------------------------------------------
 private:
 	void MoveToNextPatrolPoint();
+
+	float DistanceToPoint(AActor* Point);
 
 protected:
 	virtual void BeginPlay() override;

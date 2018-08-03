@@ -16,6 +16,15 @@ void UGuardSuspiciousState::ResetOrientation(AGuardCharacter* Character) {
     Character->SetState(EGuardState::IdleWalking);
 }
 
+void UGuardSuspiciousState::OnSeePawnEvent(
+    AGuardCharacter* Character,
+    APawn* SeePawn
+) {
+    Character->Pause();
+    Character->CallCompleteMission(SeePawn, false);
+    Character->SetState(EGuardState::Alerted);
+}
+
 void UGuardSuspiciousState::OnHearNoiseEvent(
     AGuardCharacter* Character, 
     APawn* PawnInstigator, 

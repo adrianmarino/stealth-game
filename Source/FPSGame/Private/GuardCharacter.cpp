@@ -81,32 +81,29 @@ void AGuardCharacter::Tick(float DeltaTime) {
 // ----------------------------------------------------------------------------
 // Patrol
 // ----------------------------------------------------------------------------
+float AGuardCharacter::DistanceToPoint(AActor* Point) {
+    return VectorUtils::DistanceBetween(GetActorLocation(), Point->GetActorLocation()); 
+}
+
 void AGuardCharacter::TurnPatrolDirection() {
     if(!enablePatrol) return;
 
-    float Distance = VectorUtils::DistanceBetween(
-        GetActorLocation(), 
-        CurrentPatrolPoint->GetActorLocation()
-    );
+    if(DistanceToPoint(NextPatrolPoint) >= 100) return;
 
-    if(Distance >= 100) return;
-
-    if(CurrentPatrolPoint == SecondPatrolPoint) {
-        CurrentPatrolPoint = FirstPatrolPoint;
-    } else if(CurrentPatrolPoint == FirstPatrolPoint) {
-        CurrentPatrolPoint = SecondPatrolPoint;
+    if(NextPatrolPoint == SecondPatrolPoint) {
+        NextPatrolPoint = FirstPatrolPoint;
+    } else if(NextPatrolPoint == FirstPatrolPoint) {
+        NextPatrolPoint = SecondPatrolPoint;
     }
 
-    UAIBlueprintHelperLibrary::SimpleMoveToActor(GetController(), CurrentPatrolPoint);
+    UAIBlueprintHelperLibrary::SimpleMoveToActor(GetController(), NextPatrolPoint);
 }
 
 void AGuardCharacter::MoveToNextPatrolPoint() {
     if(!enablePatrol) return;
+    if(NextPatrolPoint == nullptr) NextPatrolPoint = FirstPatrolPoint;
 
-    if(CurrentPatrolPoint == nullptr)
-        CurrentPatrolPoint = FirstPatrolPoint;
-
-    UAIBlueprintHelperLibrary::SimpleMoveToActor(GetController(), CurrentPatrolPoint);
+    UAIBlueprintHelperLibrary::SimpleMoveToActor(GetController(), NextPatrolPoint);
 }
 
 void AGuardCharacter::Play() { MoveToNextPatrolPoint(); }
