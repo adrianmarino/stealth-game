@@ -54,10 +54,7 @@ void AGuardCharacter::StartResetOrientation() {
 }
 
 void AGuardCharacter::RotateTo(FVector Location) {
-    FRotator LookAtTo = UKismetMathLibrary::FindLookAtRotation(
-        GetActorLocation(), 
-        Location
-    );
+    FRotator LookAtTo = UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), Location);
     LookAtTo.Pitch = 0;
     LookAtTo.Roll = 0;
     SetActorRotation(LookAtTo);
@@ -69,8 +66,10 @@ void AGuardCharacter::CallCompleteMission(APawn* Pawn, bool Success) {
 }
 
 void AGuardCharacter::Tick(float DeltaTime) {
+    if(CurrentState != nullptr) {
+        CurrentState->Tick(this, DeltaTime);
+    }
     Super::Tick(DeltaTime);
-    if(CurrentState != nullptr) CurrentState->Tick(this, DeltaTime);
 }
 // ----------------------------------------------------------------------------
 //
@@ -140,7 +139,5 @@ void AGuardCharacter::OnSeePawnEvent(APawn *SeePawn) {
     CurrentState->OnSeePawnEvent(this, SeePawn);
 }
 
-void AGuardCharacter::ResetOrientation() { 
-    if(CurrentState != nullptr) CurrentState->ResetOrientation(this);
-}
+void AGuardCharacter::ResetOrientation() { if(CurrentState != nullptr) CurrentState->ResetOrientation(this); }
 // ----------------------------------------------------------------------------
