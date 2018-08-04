@@ -6,10 +6,6 @@
 #include "Perception/PawnSensingComponent.h"
 #include "DrawDebugHelpers.h"
 #include "Kismet/KismetMathLibrary.h"
-#include "GuardState.h"
-#include "GuardIdleWalkingState.h"
-#include "GuardAlertedState.h"
-#include "GuardSuspiciousState.h"
 #include "VectorUtils.h"
 #include "Blueprint/AIBlueprintHelperLibrary.h"
 // ----------------------------------------------------------------------------
@@ -32,8 +28,13 @@ AGuardCharacter::AGuardCharacter() {
 // Methods
 // ----------------------------------------------------------------------------
 void AGuardCharacter::BeginPlay() {
-    SetState(EGuardState::IdleWalking);
     Super::BeginPlay();
+
+    IdleWalkingState    = NewObject<UGuardIdleWalkingState>(this, TEXT("IdleWalking"));
+    AlertedState        = NewObject<UGuardAlertedState>(this, TEXT("Alerted"));
+    SuspiciousState     = NewObject<UGuardSuspiciousState>(this, TEXT("Suspicious"));
+    CurrentState        = IdleWalkingState;
+
     OriginalRotator = GetActorRotation();
     MoveToNextPatrolPoint();
 }
@@ -69,7 +70,10 @@ void AGuardCharacter::CallCompleteMission(APawn* Pawn, bool Success) {
 
 void AGuardCharacter::Tick(float DeltaTime) {
     Super::Tick(DeltaTime);
-    GuardState->Tick(this, DeltaTime);
+
+    if(CurrentState != nullptr) {
+        CurrentState->Tick(this, DeltaTime);
+    }
 }
 // ----------------------------------------------------------------------------
 //
@@ -114,13 +118,13 @@ void AGuardCharacter::Pause() { Controller->StopMovement(); }
 // ----------------------------------------------------------------------------
 void AGuardCharacter::SetState(EGuardState NextGuardState) {
     if (EGuardState::IdleWalking == NextGuardState)
-        GuardState = NewObject<UGuardIdleWalkingState>(this, TEXT("IdleWalking"));
+        CurrentState = IdleWalkingState;
     else if(EGuardState::Alerted == NextGuardState)
-         GuardState = NewObject<UGuardAlertedState>(this, TEXT("Alerted"));
+         CurrentState = AlertedState;
     else if(EGuardState::Suspicious == NextGuardState)
-        GuardState = NewObject<UGuardSuspiciousState>(this, TEXT("Suspicious"));
+        CurrentState = SuspiciousState;
 
-    UE_LOG(LogTemp, Warning, TEXT("Change to %s state!"), *GuardState->GetName());
+    UE_LOG(LogTemp, Warning, TEXT("Change to %s state!"), *CurrentState->GetName());
 
     this->OnStateChanged(NextGuardState);
 }
@@ -130,14 +134,17 @@ void AGuardCharacter::OnHearNoiseEvent(
     const FVector &Location,
     float Volume
 ) {
-    if(PawnInstigator == nullptr) return;
-    GuardState->OnHearNoiseEvent(this, PawnInstigator, Location);
+    if(CurrentState == nullptr || PawnInstigator == nullptr) return;
+    CurrentState->OnHearNoiseEvent(this, PawnInstigator, Location);
 }
 
 void AGuardCharacter::OnSeePawnEvent(APawn *SeePawn) { 
-    if(SeePawn == nullptr) return;
-    GuardState->OnSeePawnEvent(this, SeePawn);
+    if(CurrentState == nullptr || SeePawn == nullptr) return;
+    CurrentState->OnSeePawnEvent(this, SeePawn);
 }
 
-void AGuardCharacter::ResetOrientation() { GuardState->ResetOrientation(this); }
+void AGuardCharacter::ResetOrientation() { 
+    if(CurrentState == nullptr) return;
+    CurrentState->ResetOrientation(this);
+}
 // ----------------------------------------------------------------------------

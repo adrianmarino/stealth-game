@@ -4,6 +4,10 @@
 #include "GuardStateEnum.h"
 #include "GameFramework/Character.h"
 #include "functional"
+#include "GuardState.h"
+#include "GuardIdleWalkingState.h"
+#include "GuardAlertedState.h"
+#include "GuardSuspiciousState.h"
 #include "GuardCharacter.generated.h"
 
 class UPawnSensingComponent;
@@ -22,7 +26,13 @@ private:
 
     FTimerHandle ResetRotationTimer;
 
-	IGuardState* GuardState;
+	IGuardState* CurrentState;
+
+	UGuardIdleWalkingState* IdleWalkingState;
+
+	UGuardAlertedState* AlertedState;
+
+	UGuardSuspiciousState* SuspiciousState;   
 
 protected:
 	UPROPERTY(VisibleAnywhere, Category = "AI")
