@@ -54,7 +54,7 @@ protected:
 // ----------------------------------------------------------------------------
 public:
 	AGuardCharacter();
-	
+
 // ----------------------------------------------------------------------------
 // Methods
 // ----------------------------------------------------------------------------
@@ -62,6 +62,8 @@ private:
 	void MoveToNextPatrolPoint();
 
 	float DistanceToPoint(AActor* Point);
+
+	void InitializeStates();
 
 protected:
 	virtual void BeginPlay() override;

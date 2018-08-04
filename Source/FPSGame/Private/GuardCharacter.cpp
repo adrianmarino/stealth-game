@@ -27,21 +27,21 @@ AGuardCharacter::AGuardCharacter() {
 // ----------------------------------------------------------------------------
 // Methods
 // ----------------------------------------------------------------------------
-void AGuardCharacter::BeginPlay() {
-    Super::BeginPlay();
-
+void AGuardCharacter::InitializeStates() {
     IdleWalkingState    = NewObject<UGuardIdleWalkingState>(this, TEXT("IdleWalking"));
     AlertedState        = NewObject<UGuardAlertedState>(this, TEXT("Alerted"));
     SuspiciousState     = NewObject<UGuardSuspiciousState>(this, TEXT("Suspicious"));
     CurrentState        = IdleWalkingState;
+}
 
+void AGuardCharacter::BeginPlay() {
+    Super::BeginPlay();
+    this->InitializeStates();
     OriginalRotator = GetActorRotation();
     MoveToNextPatrolPoint();
 }
 
-void AGuardCharacter::SetupOriginalOrientation() { 
-    SetActorRotation(OriginalRotator);
-}
+void AGuardCharacter::SetupOriginalOrientation() { SetActorRotation(OriginalRotator); }
 
 void AGuardCharacter::StartResetOrientation() {
     GetWorldTimerManager().ClearTimer(ResetRotationTimer);
@@ -70,10 +70,7 @@ void AGuardCharacter::CallCompleteMission(APawn* Pawn, bool Success) {
 
 void AGuardCharacter::Tick(float DeltaTime) {
     Super::Tick(DeltaTime);
-
-    if(CurrentState != nullptr) {
-        CurrentState->Tick(this, DeltaTime);
-    }
+    if(CurrentState != nullptr) CurrentState->Tick(this, DeltaTime);
 }
 // ----------------------------------------------------------------------------
 //
@@ -144,7 +141,6 @@ void AGuardCharacter::OnSeePawnEvent(APawn *SeePawn) {
 }
 
 void AGuardCharacter::ResetOrientation() { 
-    if(CurrentState == nullptr) return;
-    CurrentState->ResetOrientation(this);
+    if(CurrentState != nullptr) CurrentState->ResetOrientation(this);
 }
 // ----------------------------------------------------------------------------
