@@ -19,6 +19,11 @@ AGuardCharacter::AGuardCharacter() {
     PawnSensingComponent = CreateDefaultSubobject<UPawnSensingComponent>(TEXT("Perception"));
     PawnSensingComponent->OnSeePawn.AddDynamic(this, &AGuardCharacter::OnSeePawnEvent);
     PawnSensingComponent->OnHearNoise.AddDynamic(this, &AGuardCharacter::OnHearNoiseEvent);
+
+    PrimaryActorTick.bCanEverTick = true;
+	PrimaryActorTick.bStartWithTickEnabled = true;
+
+    CurrentState = EGuardState::IdleWalking;
 }
 // ----------------------------------------------------------------------------
 //
@@ -27,16 +32,8 @@ AGuardCharacter::AGuardCharacter() {
 // ----------------------------------------------------------------------------
 // Methods
 // ----------------------------------------------------------------------------
-void AGuardCharacter::InitializeStates() {
-    IdleWalkingState    = NewObject<UGuardIdleWalkingState>(this, TEXT("IdleWalking"));
-    AlertedState        = NewObject<UGuardAlertedState>(this, TEXT("Alerted"));
-    SuspiciousState     = NewObject<UGuardSuspiciousState>(this, TEXT("Suspicious"));
-    CurrentState        = IdleWalkingState;
-}
-
 void AGuardCharacter::BeginPlay() {
     Super::BeginPlay();
-    this->InitializeStates();
     OriginalRotator = GetActorRotation();
     MoveToNextPatrolPoint();
 }
@@ -66,10 +63,8 @@ void AGuardCharacter::CallCompleteMission(APawn* Pawn, bool Success) {
 }
 
 void AGuardCharacter::Tick(float DeltaTime) {
-    if(CurrentState != nullptr) {
-        CurrentState->Tick(this, DeltaTime);
-    }
     Super::Tick(DeltaTime);
+    TurnPatrolDirection();
 }
 // ----------------------------------------------------------------------------
 //
@@ -98,6 +93,7 @@ void AGuardCharacter::TurnPatrolDirection() {
 
 void AGuardCharacter::MoveToNextPatrolPoint() {
     if(!enablePatrol) return;
+
     if(NextPatrolPoint == nullptr) NextPatrolPoint = FirstPatrolPoint;
 
     UAIBlueprintHelperLibrary::SimpleMoveToActor(GetController(), NextPatrolPoint);
@@ -113,16 +109,8 @@ void AGuardCharacter::Pause() { Controller->StopMovement(); }
 // State Maquine
 // ----------------------------------------------------------------------------
 void AGuardCharacter::SetState(EGuardState NextGuardState) {
-    if (EGuardState::IdleWalking == NextGuardState)
-        CurrentState = IdleWalkingState;
-    else if(EGuardState::Alerted == NextGuardState)
-         CurrentState = AlertedState;
-    else if(EGuardState::Suspicious == NextGuardState)
-        CurrentState = SuspiciousState;
-
-    UE_LOG(LogTemp, Warning, TEXT("Change to %s state!"), *CurrentState->GetName());
-
-    this->OnStateChanged(NextGuardState);
+    CurrentState = NextGuardState;
+    OnStateChanged(NextGuardState);
 }
 
 void AGuardCharacter::OnHearNoiseEvent(
@@ -130,14 +118,34 @@ void AGuardCharacter::OnHearNoiseEvent(
     const FVector &Location,
     float Volume
 ) {
-    if(CurrentState == nullptr || PawnInstigator == nullptr) return;
-    CurrentState->OnHearNoiseEvent(this, PawnInstigator, Location);
+    if(PawnInstigator == nullptr) return;
+
+    RotateTo(Location);
+    StartResetOrientation();
+
+    if(EGuardState::IdleWalking == CurrentState) {
+        Pause();
+        SetState(EGuardState::Suspicious);
+    }
 }
 
-void AGuardCharacter::OnSeePawnEvent(APawn *SeePawn) { 
-    if(CurrentState == nullptr || SeePawn == nullptr) return;
-    CurrentState->OnSeePawnEvent(this, SeePawn);
+void AGuardCharacter::OnSeePawnEvent(APawn *SeePawn) {
+    if(
+        SeePawn != nullptr && 
+        (
+            EGuardState::Alerted == CurrentState ||
+            EGuardState::IdleWalking == CurrentState
+        )
+    ) {
+        SetState(EGuardState::Alerted);
+        Pause();
+        CallCompleteMission(SeePawn, false);
+    }
 }
 
-void AGuardCharacter::ResetOrientation() { if(CurrentState != nullptr) CurrentState->ResetOrientation(this); }
+void AGuardCharacter::ResetOrientation() { 
+    SetupOriginalOrientation();
+    Play();
+    SetState(EGuardState::IdleWalking);
+}
 // ----------------------------------------------------------------------------

@@ -9,4 +9,3 @@ enum class EGuardState : uint8 {
     Suspicious, 
     Alerted
 };
-

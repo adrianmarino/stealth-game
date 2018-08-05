@@ -1,17 +1,14 @@
 #pragma once
-
+// ----------------------------------------------------------------------------
+// Headers
+// ----------------------------------------------------------------------------
 #include "CoreMinimal.h"
-#include "GuardStateEnum.h"
 #include "GameFramework/Character.h"
 #include "functional"
-#include "GuardState.h"
-#include "GuardIdleWalkingState.h"
-#include "GuardAlertedState.h"
-#include "GuardSuspiciousState.h"
+#include "GuardStateEnum.h"
 #include "GuardCharacter.generated.h"
 
 class UPawnSensingComponent;
-class IGuardState;
 
 UCLASS()
 class FPSGAME_API AGuardCharacter : public ACharacter
@@ -26,14 +23,8 @@ private:
 
     FTimerHandle ResetRotationTimer;
 
-	IGuardState* CurrentState;
-
-	UGuardIdleWalkingState* IdleWalkingState;
-
-	UGuardAlertedState* AlertedState;
-
-	UGuardSuspiciousState* SuspiciousState;   
-
+	EGuardState CurrentState;
+  
 protected:
 	UPROPERTY(VisibleAnywhere, Category = "AI")
 	UPawnSensingComponent* PawnSensingComponent;
@@ -62,8 +53,6 @@ private:
 	void MoveToNextPatrolPoint();
 
 	float DistanceToPoint(AActor* Point);
-
-	void InitializeStates();
 
 protected:
 	virtual void BeginPlay() override;
