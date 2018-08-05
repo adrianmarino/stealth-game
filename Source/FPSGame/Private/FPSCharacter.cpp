@@ -105,3 +105,13 @@ void AFPSCharacter::ServerFire_Implementation() {
 }
 
 bool AFPSCharacter::ServerFire_Validate() { return true; }
+
+void AFPSCharacter::Tick(float DeltaTime) {
+	Super::Tick(DeltaTime);
+
+	if(!IsLocallyControlled()) {
+		FRotator NewRotation = CameraComponent->RelativeRotation;
+		NewRotation.Pitch = RemoteViewPitch  * 360.0f / 255.0f;
+		CameraComponent->SetRelativeRotation(NewRotation);
+	}
+}
