@@ -45,7 +45,8 @@ void AFPSProjectile::OnHit(
 		(OtherComp != NULL) && OtherComp->IsSimulatingPhysics())
 	{
 		OtherComp->AddImpulseAtLocation(GetVelocity() * 100.0f, GetActorLocation());
-		Destroy();
+		if(Role == ROLE_Authority) Destroy();
 	}
-	MakeNoise(1.0f, Instigator);
+	
+	if(Role == ROLE_Authority) MakeNoise(1.0f, Instigator);
 }

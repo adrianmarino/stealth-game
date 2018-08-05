@@ -46,29 +46,7 @@ void AFPSCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 }
 
 void AFPSCharacter::Fire() {
-	// Try and fire a projectile
-	if (ProjectileClass) {
-		FVector MuzzleLocation = GunMeshComponent->GetSocketLocation("Muzzle");
-		FRotator MuzzleRotation = GunMeshComponent->GetSocketRotation("Muzzle");
-
-		// Set Spawn Collision Handling Override
-		FActorSpawnParameters ActorSpawnParams;
-		ActorSpawnParams.SpawnCollisionHandlingOverride =
-			ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButDontSpawnIfColliding;
-		ActorSpawnParams.Instigator = this;
-
-		// Spawn the projectile at the muzzle
-		GetWorld()->SpawnActor<AFPSProjectile>(
-			ProjectileClass, 
-			MuzzleLocation, 
-			MuzzleRotation, 
-			ActorSpawnParams
-		);
-	}
-
-	// Try and play the sound if specified
-	if (FireSound)
-		UGameplayStatics::PlaySoundAtLocation(this, FireSound, GetActorLocation());
+	ServerFire();
 
 	// Try and play a firing animation if specified
 	if (FireAnimation) {
@@ -99,3 +77,31 @@ void AFPSCharacter::SetObjectiveCarried(bool Value) {
 	ObjectiveCarried = Value;
 	GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Blue, FString::Printf(TEXT("Objective Carried: %s"), Value ? TEXT("Yes") : TEXT("No")));
 }
+
+void AFPSCharacter::ServerFire_Implementation() {
+	// Try and fire a projectile
+	if (ProjectileClass) {
+		FVector MuzzleLocation = GunMeshComponent->GetSocketLocation("Muzzle");
+		FRotator MuzzleRotation = GunMeshComponent->GetSocketRotation("Muzzle");
+
+		// Set Spawn Collision Handling Override
+		FActorSpawnParameters ActorSpawnParams;
+		ActorSpawnParams.SpawnCollisionHandlingOverride =
+			ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButDontSpawnIfColliding;
+		ActorSpawnParams.Instigator = this;
+
+		// Spawn the projectile at the muzzle
+		GetWorld()->SpawnActor<AFPSProjectile>(
+			ProjectileClass, 
+			MuzzleLocation, 
+			MuzzleRotation, 
+			ActorSpawnParams
+		);
+	}
+
+	// Try and play the sound if specified
+	if (FireSound)
+		UGameplayStatics::PlaySoundAtLocation(this, FireSound, GetActorLocation());
+}
+
+bool AFPSCharacter::ServerFire_Validate() { return true; }
