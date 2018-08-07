@@ -17,11 +17,9 @@ class AFPSCharacter : public ACharacter
 {
 	GENERATED_BODY()
 
-private:
-
-	bool ObjectiveCarried;
-
 protected:
+	UPROPERTY(Replicated, BlueprintReadOnly, Category = "Gameplay")
+	bool ObjectiveCarried;
 
 	/** Pawn mesh: 1st person view  */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Mesh")
