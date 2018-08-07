@@ -23,9 +23,13 @@ private:
 
     FTimerHandle ResetRotationTimer;
 
+	UPROPERTY(ReplicatedUsing=OnRep_GuardState)
 	EGuardState CurrentState;
   
 protected:
+	UFUNCTION()
+	void OnRep_GuardState();
+
 	UPROPERTY(VisibleAnywhere, Category = "AI")
 	UPawnSensingComponent* PawnSensingComponent;
 

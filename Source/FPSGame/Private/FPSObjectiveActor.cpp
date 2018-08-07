@@ -21,7 +21,6 @@ AFPSObjectiveActor::AFPSObjectiveActor() {
 void AFPSObjectiveActor::BeginPlay() {
 	Super::BeginPlay();
 	PlayEffects();
-	UE_LOG(LogTemp, Warning, TEXT("BeginPlay"));
 }
 
 void AFPSObjectiveActor::PlayEffects() {
@@ -32,9 +31,13 @@ void AFPSObjectiveActor::NotifyActorBeginOverlap(AActor* OtherActor) {
 	Super::NotifyActorBeginOverlap(OtherActor);
 
 	AFPSCharacter* Character = Cast<AFPSCharacter>(OtherActor);
-	if(Character) {
+	if(Character == nullptr) return;
+
+	UE_LOG(LogTemp, Warning, TEXT("Objective Carried by character!"));
+	PlayEffects();
+
+	if(Role == ROLE_Authority) {
 		Character->SetObjectiveCarried(true);
-		PlayEffects();
-		UE_LOG(LogTemp, Warning, TEXT("Objective Carried by character!"));
-	}
+		Destroy();
+	}	
 }

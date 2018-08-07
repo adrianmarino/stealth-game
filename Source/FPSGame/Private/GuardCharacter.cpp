@@ -8,6 +8,7 @@
 #include "Kismet/KismetMathLibrary.h"
 #include "VectorUtils.h"
 #include "Blueprint/AIBlueprintHelperLibrary.h"
+#include "Net/UnrealNetwork.h"
 // ----------------------------------------------------------------------------
 //
 //
@@ -66,51 +67,10 @@ void AGuardCharacter::Tick(float DeltaTime) {
     Super::Tick(DeltaTime);
     TurnPatrolDirection();
 }
-// ----------------------------------------------------------------------------
-//
-//
-//
-// ----------------------------------------------------------------------------
-// Patrol
-// ----------------------------------------------------------------------------
-float AGuardCharacter::DistanceToPoint(AActor* Point) {
-    return VectorUtils::DistanceBetween(GetActorLocation(), Point->GetActorLocation()); 
-}
 
-void AGuardCharacter::TurnPatrolDirection() {
-    if(!enablePatrol) return;
-
-    if(DistanceToPoint(NextPatrolPoint) >= 100) return;
-
-    if(NextPatrolPoint == SecondPatrolPoint) {
-        NextPatrolPoint = FirstPatrolPoint;
-    } else if(NextPatrolPoint == FirstPatrolPoint) {
-        NextPatrolPoint = SecondPatrolPoint;
-    }
-
-    UAIBlueprintHelperLibrary::SimpleMoveToActor(GetController(), NextPatrolPoint);
-}
-
-void AGuardCharacter::MoveToNextPatrolPoint() {
-    if(!enablePatrol) return;
-
-    if(NextPatrolPoint == nullptr) NextPatrolPoint = FirstPatrolPoint;
-
-    UAIBlueprintHelperLibrary::SimpleMoveToActor(GetController(), NextPatrolPoint);
-}
-
-void AGuardCharacter::Play() { MoveToNextPatrolPoint(); }
-void AGuardCharacter::Pause() { Controller->StopMovement(); }
-// ----------------------------------------------------------------------------
-//
-//
-//
-// ----------------------------------------------------------------------------
-// State Maquine
-// ----------------------------------------------------------------------------
 void AGuardCharacter::SetState(EGuardState NextGuardState) {
     CurrentState = NextGuardState;
-    OnStateChanged(NextGuardState);
+    OnRep_GuardState();
 }
 
 void AGuardCharacter::OnHearNoiseEvent(
@@ -148,4 +108,49 @@ void AGuardCharacter::ResetOrientation() {
     Play();
     SetState(EGuardState::IdleWalking);
 }
+
+void AGuardCharacter::OnRep_GuardState() {
+    OnStateChanged(CurrentState);
+}
+
+void AGuardCharacter::GetLifetimeReplicatedProps(TArray< FLifetimeProperty > & OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	DOREPLIFETIME(AGuardCharacter, CurrentState);
+}
+// ----------------------------------------------------------------------------
+//
+//
+//
+// ----------------------------------------------------------------------------
+// Patrol
+// ----------------------------------------------------------------------------
+float AGuardCharacter::DistanceToPoint(AActor* Point) {
+    return VectorUtils::DistanceBetween(GetActorLocation(), Point->GetActorLocation()); 
+}
+
+void AGuardCharacter::TurnPatrolDirection() {
+    if(!enablePatrol) return;
+
+    if(DistanceToPoint(NextPatrolPoint) >= 100) return;
+
+    if(NextPatrolPoint == SecondPatrolPoint) {
+        NextPatrolPoint = FirstPatrolPoint;
+    } else if(NextPatrolPoint == FirstPatrolPoint) {
+        NextPatrolPoint = SecondPatrolPoint;
+    }
+
+    UAIBlueprintHelperLibrary::SimpleMoveToActor(GetController(), NextPatrolPoint);
+}
+
+void AGuardCharacter::MoveToNextPatrolPoint() {
+    if(!enablePatrol) return;
+
+    if(NextPatrolPoint == nullptr) NextPatrolPoint = FirstPatrolPoint;
+
+    UAIBlueprintHelperLibrary::SimpleMoveToActor(GetController(), NextPatrolPoint);
+}
+
+void AGuardCharacter::Play() { MoveToNextPatrolPoint(); }
+void AGuardCharacter::Pause() { Controller->StopMovement(); }
 // ----------------------------------------------------------------------------
