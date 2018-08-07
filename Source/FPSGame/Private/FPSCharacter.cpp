@@ -48,6 +48,10 @@ void AFPSCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 void AFPSCharacter::Fire() {
 	ServerFire();
 
+	// Try and play the sound if specified
+	if (FireSound)
+		UGameplayStatics::PlaySoundAtLocation(this, FireSound, GetActorLocation());
+
 	// Try and play a firing animation if specified
 	if (FireAnimation) {
 		// Get the animation object for the arms mesh
@@ -98,10 +102,6 @@ void AFPSCharacter::ServerFire_Implementation() {
 			ActorSpawnParams
 		);
 	}
-
-	// Try and play the sound if specified
-	if (FireSound)
-		UGameplayStatics::PlaySoundAtLocation(this, FireSound, GetActorLocation());
 }
 
 bool AFPSCharacter::ServerFire_Validate() { return true; }
