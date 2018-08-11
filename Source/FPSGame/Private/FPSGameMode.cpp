@@ -32,11 +32,18 @@ void AFPSGameMode::CompleteMission(APawn* InstigatorPawn, bool MissionSuccess) {
 	);
 	if(!PlayerController) return;
 
-	PlayerController->SetViewTargetWithBlend(
-		NewViewTarget,
-		0.5f,
-		EViewTargetBlendFunction::VTBlend_Cubic
-	);
+	for(FConstPlayerControllerIterator It = GetWorld()->GetPlayerControllerIterator(); It; It++)
+    {
+        AFPSPlayerController* CurrentController = Cast<AFPSPlayerController>(It->Get());
+        if(CurrentController) 
+        {  
+			CurrentController->SetViewTargetWithBlend(
+				NewViewTarget,
+				0.5f,
+				EViewTargetBlendFunction::VTBlend_Cubic
+			);
+		}
+	}
 
 	AFPSGameState* GameState = GetGameState<AFPSGameState>();
 	if(GameState) GameState->MulticastOnMissionComplete(InstigatorPawn, MissionSuccess);
