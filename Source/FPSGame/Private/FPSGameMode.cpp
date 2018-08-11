@@ -4,6 +4,7 @@
 #include "UObject/ConstructorHelpers.h"
 #include "Kismet/GameplayStatics.h"
 #include "FPSGameState.h"
+#include "FPSPlayerController.h"
 
 AFPSGameMode::AFPSGameMode() {
 	static ConstructorHelpers::FClassFinder<APawn> PlayerPawnClassFinder(TEXT("/Game/Blueprints/BP_Player"));
@@ -11,6 +12,7 @@ AFPSGameMode::AFPSGameMode() {
 
 	HUDClass = AFPSHUD::StaticClass();
 	GameStateClass = AFPSGameState::StaticClass();
+	PlayerControllerClass = AFPSPlayerController::StaticClass();
 }
 
 void AFPSGameMode::CompleteMission(APawn* InstigatorPawn, bool MissionSuccess) {
@@ -36,14 +38,6 @@ void AFPSGameMode::CompleteMission(APawn* InstigatorPawn, bool MissionSuccess) {
 		EViewTargetBlendFunction::VTBlend_Cubic
 	);
 
-	if(MissionSuccess) {
-		UE_LOG(LogTemp, Log, TEXT("Mission Completed!"));
-	} else {
-		UE_LOG(LogTemp, Log, TEXT("Mission Fail!"));
-	}
-
 	AFPSGameState* GameState = GetGameState<AFPSGameState>();
 	if(GameState) GameState->MulticastOnMissionComplete(InstigatorPawn, MissionSuccess);
-
-	OnMissionCompleted(InstigatorPawn, MissionSuccess);
 }
