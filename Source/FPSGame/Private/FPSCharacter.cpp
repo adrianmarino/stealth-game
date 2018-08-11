@@ -96,9 +96,9 @@ void AFPSCharacter::ServerFire_Implementation() {
 
 		// Spawn the projectile at the muzzle
 		GetWorld()->SpawnActor<AFPSProjectile>(
-			ProjectileClass, 
-			MuzzleLocation, 
-			MuzzleRotation, 
+			ProjectileClass,
+			MuzzleLocation,
+			MuzzleRotation,
 			ActorSpawnParams
 		);
 	}

@@ -3,12 +3,14 @@
 #include "FPSCharacter.h"
 #include "UObject/ConstructorHelpers.h"
 #include "Kismet/GameplayStatics.h"
+#include "FPSGameState.h"
 
 AFPSGameMode::AFPSGameMode() {
 	static ConstructorHelpers::FClassFinder<APawn> PlayerPawnClassFinder(TEXT("/Game/Blueprints/BP_Player"));
 	DefaultPawnClass = PlayerPawnClassFinder.Class;
 
 	HUDClass = AFPSHUD::StaticClass();
+	GameStateClass = AFPSGameState::StaticClass();
 }
 
 void AFPSGameMode::CompleteMission(APawn* InstigatorPawn, bool MissionSuccess) {
@@ -17,8 +19,6 @@ void AFPSGameMode::CompleteMission(APawn* InstigatorPawn, bool MissionSuccess) {
 		UE_LOG(LogTemp, Error, TEXT("SpectatingViewpointClass is nullptr!. Can not change view spectating view target."));
 		return;
 	}
-
-	InstigatorPawn->DisableInput(nullptr);
 
 	TArray<AActor*> SpectatingActors;
 	UGameplayStatics::GetAllActorsOfClass(this, SpectatingViewpointClass, SpectatingActors);
@@ -41,6 +41,9 @@ void AFPSGameMode::CompleteMission(APawn* InstigatorPawn, bool MissionSuccess) {
 	} else {
 		UE_LOG(LogTemp, Log, TEXT("Mission Fail!"));
 	}
+
+	AFPSGameState* GameState = GetGameState<AFPSGameState>();
+	if(GameState) GameState->MulticastOnMissionComplete(InstigatorPawn, MissionSuccess);
 
 	OnMissionCompleted(InstigatorPawn, MissionSuccess);
 }
