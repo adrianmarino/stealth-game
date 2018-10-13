@@ -1,6 +1,6 @@
 # stealth-game
 
-Another stealth Game.
+Another stealth game.
 
 ## Game play
 
